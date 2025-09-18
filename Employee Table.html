@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ตารางพนักงาน-รถ - JIRATTHAKARN</title>
+    <link rel="icon" href="LogJK.png" type="image/png" />
+    <style>
+      :root {
+        --blue-500: #2b7be9;
+        --blue-600: #1f67d6;
+        --green-500: #10b981;
+        --orange-500: #f59e0b;
+        --muted: #6b7280;
+        --card-bg: rgba(255, 255, 255, 0.98);
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Inter, "Noto Sans Thai", system-ui, -apple-system,
+          "Segoe UI", Roboto, Arial;
+        background: linear-gradient(180deg, #f7fbff 0%, #f2f7ff 100%);
+        display: flex;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      .card-wrap {
+        width: 100%;
+        max-width: 1000px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+        padding: 60px 30px 30px;
+        position: relative;
+      }
+
+      .logo-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid white;
+        box-shadow: 0 6px 18px rgba(43, 123, 233, 0.2);
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo-circle img {
+        width: 75%;
+        height: 75%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+
+      .brand {
+        text-align: center;
+        margin-top: 20px;
+      }
+      .brand h1 {
+        margin: 12px 0 6px;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      .brand .subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .search-box {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .search-box input {
+        flex: 1;
+        min-width: 120px;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: left;
+        vertical-align: middle;
+      }
+      th {
+        background: #eaf4ff;
+        color: var(--blue-500);
+        font-weight: 600;
+        border-radius: 12px 12px 0 0;
+      }
+      td {
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        border-radius: 12px;
+      }
+      tr:hover td {
+        background: #f0f7ff;
+        transition: 0.2s;
+      }
+
+      .button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        font-size: 13px;
+      }
+      .phone-btn {
+        background-color: var(--green-500);
+      }
+      .gps-btn {
+        background-color: var(--orange-500);
+      }
+
+      td.actions {
+        text-align: center;
+      }
+
+      @media (max-width: 640px) {
+        .card-wrap {
+          padding: 50px 20px 20px;
+        }
+        table {
+          font-size: 13px;
+        }
+        .search-box input {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-wrap">
+      <div class="logo-circle"><img src="LogJK.png" alt="Logo JK" /></div>
+      <div class="brand">
+        <h1>ตารางพนักงาน-รถ</h1>
+        <p class="subtitle">ข้อมูลพนักงานและรถประจำสาย</p>
+      </div>
+
+      <div class="search-box">
+        <input
+          type="text"
+          id="searchName"
+          placeholder="ค้นหาชื่อ..."
+          onkeyup="filterTable()"
+        />
+        <input
+          type="text"
+          id="searchLine"
+          placeholder="ค้นหาสายรถ..."
+          onkeyup="filterTable()"
+        />
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ลำดับ</th>
+            <th>ชื่อ</th>
+            <th>นามสกุล</th>
+            <th>ทะเบียนรถ</th>
+            <th>สายรถ</th>
+            <th>ประเภทรถ</th>
+            <th>การติดต่อ</th>
+            <th>GPS</th>
+          </tr>
+        </thead>
+        <tbody id="employeeBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      const data = [
+        {
+          no: 1,
+          first: "สุพิษ",
+          last: "พันมูล",
+          plate: "30-4876 ชลบุรี",
+          line: "ชลบุรี",
+          phone: "093-3805222",
+          type: "บัส",
+          gps: "http://gpst1.thaigpstracker.co.th/tracking/trackingmap?imei=868998031023274&mapType=esri&code=DDcceba7",
+        },
+        {
+          no: 2,
+          first: "สมบุญ",
+          last: "กำลังเลิศ",
+          plate: "33-8317 กทม.",
+          line: "พานทอง - บ้านบึง",
+          phone: "082-1803084",
+          type: "บัส",
+          gps: "",
+        },
+        {
+          no: 3,
+          first: "ชวลิต",
+          last: "ปลัดครบุรี",
+          plate: "30-5577 ชลบุรี",
+          line: "ปลวกแดง",
+          phone: "098-8260516",
+          type: "บัส",
+          gps: "",
+        },
+        {
+          no: 4,
+          first: "มาโนช",
+          last: "โหมดนอก",
+          plate: "30-1711 กทม.",
+          line: "มาบยางพร - สะพานสี่",
+          phone: "061-2572213",
+          type: "บัส",
+          gps: "http://gpst1.thaigpstracker.co.th/tracking/trackingmap?imei=861076083681310&mapType=esri&code=DDb0f244",
+        },
+        {
+          no: 5,
+          first: "พรพจน์",
+          last: "ตะโคดม",
+          plate: "33-4837 กทม.",
+          line: "ห้วยปราบ",
+          phone: "091-2435907",
+          type: "บัส",
+          gps: "",
+        },
+        {
+          no: 6,
+          first: "ณรงค์",
+          last: "รอบคอบ",
+          plate: "30-4781 ชลบุรี",
+          line: "เครือสหพัฒน์",
+          phone: "095-9520385",
+          type: "บัส",
+          gps: "https://v2.gpsiam.net/flashview/TJQMCK4YBM6M",
+        },
+      ];
+
+      function renderTable() {
+        const tbody = document.getElementById("employeeBody");
+        tbody.innerHTML = "";
+        data.forEach((d) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+      <td>${d.no}</td>
+      <td>${d.first}</td>
+      <td>${d.last}</td>
+      <td>${d.plate}</td>
+      <td>${d.line}</td>
+      <td>${d.type}</td>
+      <td class="actions">
+        <span>${d.phone}</span>
+        <button class="button phone-btn" onclick="copyPhone('${
+          d.phone
+        }')">คัดลอก</button>
+      </td>
+      <td class="actions">
+        ${
+          d.gps
+            ? `<button class="button gps-btn" onclick="window.open('${d.gps}','_blank')">GPS</button>`
+            : "-"
+        }
+      </td>
+    `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function copyPhone(number) {
+        navigator.clipboard.writeText(number).then(() => {
+          alert("คัดลอกเบอร์โทรศัพท์: " + number);
+        });
+      }
+
+      function filterTable() {
+        const nameInput = document
+          .getElementById("searchName")
+          .value.toLowerCase();
+        const lineInput = document
+          .getElementById("searchLine")
+          .value.toLowerCase();
+        const trs = document
+          .getElementById("employeeBody")
+          .getElementsByTagName("tr");
+        for (let i = 0; i < trs.length; i++) {
+          const tdFirst = trs[i]
+            .getElementsByTagName("td")[1]
+            .textContent.toLowerCase();
+          const tdLast = trs[i]
+            .getElementsByTagName("td")[2]
+            .textContent.toLowerCase();
+          const tdLine = trs[i]
+            .getElementsByTagName("td")[4]
+            .textContent.toLowerCase();
+          trs[i].style.display =
+            (tdFirst.includes(nameInput) || tdLast.includes(nameInput)) &&
+            tdLine.includes(lineInput)
+              ? ""
+              : "none";
+        }
+      }
+
+      renderTable();
+    </script>
+  </body>
+</html>

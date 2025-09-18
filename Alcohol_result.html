@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ผลตรวจแอลกอฮอล์ - JIRATTHAKARN</title>
+<link rel="icon" href="LogJK.png" type="image/png" />
+<style>
+  :root {
+    --blue-500: #2b7be9;
+    --green-500: #10b981;
+    --red-500: #ef4444;
+    --muted: #6b7280;
+    --card-bg: rgba(255, 255, 255, 0.98);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Inter, "Noto Sans Thai", system-ui, -apple-system,
+      "Segoe UI", Roboto, Arial;
+    background: linear-gradient(180deg, #f7fbff 0%, #f2f7ff 100%);
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .card-wrap {
+    width: 100%;
+    max-width: 900px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+    padding: 60px 30px 30px;
+    position: relative;
+  }
+
+  .logo-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid white;
+    box-shadow: 0 6px 18px rgba(43, 123, 233, 0.2);
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-circle img { width: 75%; height: 75%; object-fit: cover; border-radius: 50%; }
+
+  .brand { text-align: center; margin-top: 20px; }
+  .brand h1 { margin: 12px 0 6px; font-size: 24px; font-weight: 600; color: #1f2937; }
+  .brand .subtitle { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  th {
+    background: #eaf4ff;
+    color: var(--blue-500);
+    font-weight: 600;
+    border-radius: 12px 12px 0 0;
+  }
+  td {
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    border-radius: 12px;
+  }
+  tr:hover td {
+    background: #f0f7ff;
+    transition: 0.2s;
+  }
+
+  .status {
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
+  }
+  .pass { background: var(--green-500); color: white; }
+  .fail { background: var(--red-500); color: white; }
+
+  .photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+  }
+
+  @media (max-width: 640px) {
+    .card-wrap { padding: 50px 20px 20px; }
+    .photo { width: 40px; height: 40px; }
+    table { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="card-wrap">
+  <div class="logo-circle"><img src="LogJK.png" alt="Logo JK" /></div>
+  <div class="brand">
+    <h1>ผลตรวจแอลกอฮอล์</h1>
+    <p class="subtitle">แบบฟอร์มนี้จัดทำเพื่อความปลอดภัยในการขับขี่</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>วัน/เวลา</th>
+        <th>ชื่อพนักงาน</th>
+        <th>ทะเบียนรถ</th>
+        <th>ประเภทรถ</th>
+        <th>ค่าที่ได้ (%)</th>
+        <th>ผลตรวจ</th>
+        <th>รูป</th>
+      </tr>
+    </thead>
+    <tbody id="vehicleBody"></tbody>
+  </table>
+</div>
+
+<script>
+const data = [
+  { timestamp: "2025-09-18 08:15:12", employee: "สมฤดี ทัททัน", plate: "10-9999", type: "รถตู้", alcohol: 0.0, photo: "LogJK.png" },
+  { timestamp: "2025-09-18 08:20:05", employee: "กิตติพงศ์ แสนสุข", plate: "20-5678", type: "รถทัวร์", alcohol: 0.01, photo: "LogJK.png" },
+];
+
+const tbody = document.getElementById("vehicleBody");
+data.forEach(d => {
+  let limit = 0; // สำหรับรถตู้/รถทัวร์ ตามกฎหมาย
+  if(d.type === "รถยนต์") limit = 0.05;
+  if(d.type === "จักรยานยนต์") limit = 0.02;
+
+  const result = d.alcohol <= limit ? "ผ่าน" : "ห้ามขับ";
+  const statusClass = d.alcohol <= limit ? "pass" : "fail";
+
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${d.timestamp}</td>
+    <td>${d.employee}</td>
+    <td>${d.plate}</td>
+    <td>${d.type}</td>
+    <td>${d.alcohol.toFixed(2)}</td>
+    <td><span class="status ${statusClass}">${result}</span></td>
+    <td><img src="${d.photo}" alt="${d.employee}" class="photo"></td>
+  `;
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
